@@ -13,6 +13,25 @@ router.get('/', async (ctx, next) => {
   })
 })
 
+
+/**
+ * @swagger
+ * /login:
+ *  post:
+ *    description: 登录接口
+ *    tags: [用户登录模块]
+ *    parameters:
+ *      - name: username
+ *        description:  用户名
+ *        required: true
+ *        type: strirng
+ *      - name: password
+ *        description:  用户密码
+ *        required: true
+ *        type: strirng
+ *    responses:
+ *      200
+ */
 router.post('/login', async (ctx, next) => {
   const data = ctx.request.body;
   const captcha = ctx.session.captcha;
@@ -162,14 +181,17 @@ router.get('/captchaImage', async (ctx, next) => {
 
 /*
 接口文档
+@swagger
+配置示例地址 https://editor.swagger.io/
 */
-router.get('/swagger', async (ctx) => {
+router.get('/swagger.json', async (ctx) => {
   const swaggerDefinition = {
       info: {
-          title: 'koa2-rouyi',
+          title: 'koa2-rouyi接口文档',
           version: '1.0.0',
-          description: 'API',
+          description: '示例',
       },
+      host: 'localhost:3000',
       basePath: '/' // Base path (optional)
   };
   const options = {
@@ -180,5 +202,6 @@ router.get('/swagger', async (ctx) => {
   ctx.set('Content-Type', 'application/json');
   ctx.body = swaggerSpec;
 })
+
 
 module.exports = router

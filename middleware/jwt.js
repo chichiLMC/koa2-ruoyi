@@ -1,10 +1,11 @@
 const jwt = require("jsonwebtoken");
-const noVerifyApi = ['/login', '/logout', '/captchaImage', '/swagger', '/swagger-ui/']
+const noVerifyApi = ['login', 'logout', 'captchaImage', 'swagger-ui', 'swagger.json']
 
 module.exports = function () {
     return async (ctx, next) => {
         try {
-            if(noVerifyApi.indexOf(ctx.originalUrl) == -1){
+           const path = ctx.originalUrl.split('/')
+            if(noVerifyApi.indexOf(path[1]) == -1){
                 const token = ctx.header.authorization.split(' ');
                 const userInfo = jwt.verify(token[1], 'token');
                 ctx.user = {

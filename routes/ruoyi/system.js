@@ -4,7 +4,6 @@ const { StringDecoder } = require('string_decoder')
 const decoder = new StringDecoder('utf8')
 const config = require('../../config')
 const utils = require('../../utils')
-const crypto = require('../../utils/crypto')
 
 router.prefix('/system')
 
@@ -118,7 +117,7 @@ router.post('/user', async (ctx) => {
         utils.operLog(ctx)
     } else {
         var params = ctx.writeLine(ctx.request.body);
-        params.password = crypto.enCipher(params.password)
+        params.password = utils.enCipher(params.password)
         params.create_time = new Date();
         params.create_by = utils.getUser(ctx, 'user_name');
         delete params.post_ids;
@@ -145,7 +144,7 @@ router.put('/user', async (ctx) => {
     const { postIds, roleIds, } = ctx.request.body;
     var params = ctx.writeLine(ctx.request.body);
     const { user_id } = params;
-    params.password = crypto.enCipher(params.password)
+    params.password = utils.enCipher(params.password)
     params.update_time = new Date();
     params.update_by = utils.getUser(ctx, 'user_name');
     delete params.dept;
@@ -172,7 +171,7 @@ router.put('/user', async (ctx) => {
 })
 router.put('/user/resetPwd', async (ctx) => {
     var { userId, password } = ctx.request.body;
-    password = crypto.enCipher(password)
+    password = utils.enCipher(password)
     await exec(sql.table('sys_user').data({ password }).where({ user_id: userId }).update())
     ctx.body = {
         code: config.SUCCODE,
@@ -293,7 +292,7 @@ router.put('/user/profile', async (ctx) => {
 router.put('/user/profile/updatePwd', async (ctx) => {
     var params = ctx.request.query;
     const user =  await exec(sql.table('sys_user'). where({user_id: utils.getUser(ctx, 'user_id')}).select(), 0)
-    if(crypto.enCipher(params.oldPassword) != user.password){
+    if(utils.enCipher(params.oldPassword) != user.password){
         ctx.body = {
             code: config.ERRCODE,
             msg: '旧密码错误'
@@ -301,7 +300,7 @@ router.put('/user/profile/updatePwd', async (ctx) => {
         utils.operLog(ctx)
         return 
     }
-    await exec(sql.table('sys_user').data({password: crypto.enCipher(params.newPassword)}). where({user_id: user.user_id}).update())
+    await exec(sql.table('sys_user').data({password: utils.enCipher(params.newPassword)}). where({user_id: user.user_id}).update())
     ctx.body = {
         code: config.SUCCODE,
         msg: config.SUCCMSG
