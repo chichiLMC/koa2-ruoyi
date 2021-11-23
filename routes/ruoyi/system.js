@@ -1,5 +1,6 @@
 const router = require('koa-router')()
 const { exec, sql } = require('mysqls')
+//const userController = require('../../controllers/system/user')
 const { StringDecoder } = require('string_decoder')
 const decoder = new StringDecoder('utf8')
 const config = require('../../config')
@@ -70,6 +71,7 @@ router.get('/dict/data/list', async (ctx) => {
 /*
 @ 用户管理
 */
+//router.get('/user/list', userController.index)
 router.get('/user/list', async (ctx, next) => {
     const params = ctx.request.query || { pageNum: 1, pageSize: 10 };
     var where = { del_flag: 0 };
