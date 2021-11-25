@@ -10,11 +10,17 @@ class sqlServices {
      * select 
      */
     async index(order = '') {
-        return await exec(sql.table(this.tableName).where(this.where).order(order).select())
+        if(order){
+            return await exec(sql.table(this.tableName).where(this.where).order(order).select())
+        }
+        return await exec(sql.table(this.tableName).where(this.where).select())
     }
 
     async list(pageNum = 0, pageSize = 10, order = '') {
-        return await exec(sql.table(this.tableName).where(this.where).limit(pageNum, pageSize).order(order).select())
+        if(order){
+            return await exec(sql.table(this.tableName).where(this.where).limit(pageNum, pageSize).order(order).select())
+        }
+        return await exec(sql.table(this.tableName).where(this.where).limit(pageNum, pageSize).select())
     }
 
     async query(field = '', index) {
