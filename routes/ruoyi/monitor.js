@@ -19,12 +19,12 @@ router.get('/logininfor/list', async (ctx, next) => {
   }
   const rows = await exec(sql.table('sys_logininfor').where(where).limit(utils.toInt(params.pageNum)-1,params.pageSize).select())
   const total = await exec(sql.count().table('sys_logininfor').where(where).select())
-  ctx.body = {
-      code: config.SUCCODE,
-      rows: ctx.write(rows),
-      total: total[0]['COUNT(1)'],
-      msg: config.QUETYMSG
-  }
+  ctx.json({
+    code: config.SUCCODE,
+    rows,
+    total: total[0]['COUNT(1)'],
+    msg: config.QUETYMSG
+  })
 })
 router.delete('/logininfor/:infoId', async (ctx) => {
   try {
@@ -61,12 +61,12 @@ router.get('/operlog/list', async (ctx, next) => {
   }
   const rows = await exec(sql.table('sys_oper_log').where(where).limit(utils.toInt(params.pageNum)-1,params.pageSize).select())
   const total = await exec(sql.count().table('sys_oper_log').where(where).select())
-  ctx.body = {
-      code: 200,
-      rows: ctx.write(rows),
-      total: total[0]['COUNT(1)'],
-      msg: '查询成功'
-  }
+  ctx.json({
+    code: config.SUCCODE,
+    rows,
+    total: total[0]['COUNT(1)'],
+    msg: config.QUETYMSG
+  })
 })
 router.delete('/operlog/:operId', async (ctx) => {
   try {

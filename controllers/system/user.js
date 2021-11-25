@@ -33,11 +33,46 @@ class userController {
             rows[i].dept = dept
             delete rows[i].password
         }
-        ctx.body = {
+        ctx.json({
             code: config.SUCCODE,
-            rows: ctx.write(rows),
+            rows,
             total,
             msg: config.QUETYMSG
+        })
+    }
+
+    static async create(ctx) {
+        const { userName, postIds, roleIds, } = ctx.request.body;
+        const data = await new sqlServices('sys_user', { del_flag: 0, user_name: userName }).index();
+        if (data.length) {
+            ctx.body = {
+                code: config.ERRCODE,
+                msg: '已存在该用户名'
+            }
+            utils.operLog(ctx)
+        } else {
+            var params = ctx.write(ctx.request.body);
+            params.password = utils.enCipher(params.password)
+            params.create_time = new Date();
+            params.create_by = utils.getUser(ctx, 'user_name');
+            delete params.post_ids;
+            delete params.role_ids
+            const result = await new sqlServices('sys_user').insert(params)
+            var userPost = [];
+            var userRole = [];
+            for (let i = 0; i < postIds.length; i++) {
+                userPost.push({ user_id: result.insertId, post_id: postIds[i] })
+            }
+            for (let i = 0; i < roleIds.length; i++) {
+                userRole.push({ user_id: result.insertId, role_id: roleIds[i] })
+            }
+            if (userPost.length) await new sqlServices('sys_user_post').insert(userPost);
+            if (userRole.length) await new sqlServices('sys_user_role').insert(userRole);
+            ctx.body = {
+                code: config.SUCCODE,
+                msg: config.SUCCMSG
+            }
+            utils.operLog(ctx)
         }
     }
 }

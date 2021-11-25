@@ -122,13 +122,13 @@ router.get('/getInfo', async (ctx, next) => {
         permissions.push(permission[i].perms)
       }
     }
-    ctx.body = {
+    ctx.json({
       code: config.SUCCODE,
       msg: config.SUCCMSG,
       permissions,
       roles: [user.roles[0].role_key],
-      user: ctx.write(user)
-    }
+      user: user
+    })
   }
 })
 

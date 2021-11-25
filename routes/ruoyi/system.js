@@ -14,11 +14,11 @@ router.prefix('/system')
 router.get('/dict/data/type/:name', async (ctx, next) => {
     try {
         const data = await exec(sql.table('sys_dict_data').where({ dict_type: ctx.params.name }).order('dict_sort').select())
-        ctx.body = {
+        ctx.json({
             code: config.SUCCODE,
-            data: ctx.write(data),
+            data,
             msg: config.SUCCMSG
-        }
+        })
     } catch (error) {
         ctx.body = {
             code: config.ERRCODE,
@@ -31,19 +31,19 @@ router.get('/dict/type/:dictId', async (ctx) => {
         if (ctx.params.dictId === 'list') {
             const rows = await exec(sql.table('sys_dict_type').select())
             const total = await exec(sql.count().table('sys_dict_type').select())
-            ctx.body = {
+            ctx.json({
                 code: config.SUCCODE,
-                rows: ctx.write(rows),
+                rows,
                 total: total[0]['COUNT(1)'],
                 msg: config.QUETYMSG
-            }
+            })
         } else {
             const data = await exec(sql.table('sys_dict_type').where({ dict_id: ctx.params.dictId }).select())
-            ctx.body = {
+            ctx.json({
                 code: config.SUCCODE,
-                data: ctx.write(data[0]),
+                data: data[0],
                 msg: config.SUCCMSG
-            }
+            })
         }
     } catch (error) {
         ctx.body = {
@@ -60,12 +60,12 @@ router.get('/dict/data/list', async (ctx) => {
     if (params.status != undefined && params.status != '') { where.status = params.status }
     const rows = await exec(sql.table('sys_dict_data').where(where).limit(utils.toInt(params.pageNum) - 1, params.pageSize).select())
     const total = await exec(sql.count().table('sys_dict_data').where(where).select())
-    ctx.body = {
+    ctx.json({
         code: config.SUCCODE,
-        rows: ctx.write(rows),
+        rows,
         total: total[0]['COUNT(1)'],
         msg: config.QUETYMSG
-    }
+    })
 })
 
 /*
@@ -101,12 +101,12 @@ router.get('/user/list', async (ctx, next) => {
         rows[i].dept = dept[0]
         delete rows[i].password
     }
-    ctx.body = {
+    ctx.json({
         code: config.SUCCODE,
-        rows: ctx.write(rows),
+        rows,
         total: total[0]['COUNT(1)'],
         msg: config.QUETYMSG
-    }
+    })
 })
 router.post('/user', async (ctx) => {
     const { userName, postIds, roleIds, } = ctx.request.body;
@@ -118,7 +118,7 @@ router.post('/user', async (ctx) => {
         }
         utils.operLog(ctx)
     } else {
-        var params = ctx.writeLine(ctx.request.body);
+        var params = ctx.write(ctx.request.body);
         params.password = utils.enCipher(params.password)
         params.create_time = new Date();
         params.create_by = utils.getUser(ctx, 'user_name');
@@ -144,7 +144,7 @@ router.post('/user', async (ctx) => {
 })
 router.put('/user', async (ctx) => {
     const { postIds, roleIds, } = ctx.request.body;
-    var params = ctx.writeLine(ctx.request.body);
+    var params = ctx.write(ctx.request.body);
     const { user_id } = params;
     params.password = utils.enCipher(params.password)
     params.update_time = new Date();
@@ -184,12 +184,12 @@ router.put('/user/resetPwd', async (ctx) => {
 router.get('/user/', async (ctx) => {
     const posts = await exec(sql.table('sys_post').order('post_sort').select());
     const roles = await exec(sql.table('sys_role').where({ del_flag: 0, role_key: { NEQ: 'admin' } }).order('role_sort').select());
-    ctx.body = {
+    ctx.json({
         code: config.SUCCODE,
-        posts: ctx.write(posts),
-        roles: ctx.write(roles),
+        posts,
+        roles,
         msg: config.SUCCMSG
-    }
+    })
 })
 router.get('/user/:userId', async (ctx) => {
     try {
@@ -213,15 +213,15 @@ router.get('/user/:userId', async (ctx) => {
             for (let i = 0; i < roleRes.length; i++) {
                 roleIds.push(roleRes[i].role_id)
             }
-            ctx.body = {
+            ctx.json({
                 code: config.SUCCODE,
-                data: ctx.write(data),
-                posts: ctx.write(posts),
+                data,
+                posts,
                 postIds,
-                roles: ctx.write(roles),
+                roles,
                 roleIds,
                 msg: config.SUCCMSG
-            }
+            })
         }
     } catch (error) {
         ctx.body = {
@@ -237,12 +237,12 @@ router.get('/user/authRole/:userId', async (ctx) => {
     data.dept = dept[0];
     delete data.password;
     const roles = await exec(sql.table('sys_role').where({ del_flag: 0, role_key: { NEQ: 'admin' } }).order('role_sort').select())
-    ctx.body = {
+    ctx.json({
         code: config.SUCCODE,
-        user: ctx.write(data),
-        roles: ctx.write(roles),
+        user: data,
+        roles,
         msg: config.SUCCMSG
-    }
+    })
 })
 router.put('/user/authRole', async (ctx) => {
     var { userId, roleIds } = ctx.request.query;
@@ -325,16 +325,16 @@ router.get('/role/list', async (ctx, next) => {
     }
     const rows = await exec(sql.table('sys_role').where(where).limit(utils.toInt(params.pageNum) - 1, params.pageSize).order('role_sort').select())
     const total = await exec(sql.count().table('sys_role').where(where).select())
-    ctx.body = {
+    ctx.json({
         code: config.SUCCODE,
-        rows: ctx.write(rows),
+        rows,
         total: total[0]['COUNT(1)'],
         msg: config.QUETYMSG
-    }
+    })
 })
 router.post('/role', async (ctx) => {
     const { menuIds } = ctx.request.body;
-    var params = ctx.writeLine(ctx.request.body);
+    var params = ctx.write(ctx.request.body);
     params.create_time = new Date();
     params.create_by = utils.getUser(ctx, 'user_name');
     delete params.dept_ids;
@@ -363,7 +363,7 @@ router.put('/role', async (ctx) => {
         delete params.menuIds;
         params.update_time = new Date();
         params.update_by = utils.getUser(ctx, 'user_name');
-        await exec(sql.table('sys_role').data(ctx.writeLine(params)).where({ role_id: params.roleId }).update())
+        await exec(sql.table('sys_role').data(ctx.write(params)).where({ role_id: params.roleId }).update())
         var menuIdArr = [];
         menuIds.forEach(item => {
             menuIdArr.push({
@@ -389,11 +389,11 @@ router.put('/role', async (ctx) => {
 router.get('/role/:roleId', async (ctx) => {
     try {
         const data = await exec(sql.table('sys_role').where({ role_id: ctx.params.roleId }).select());
-        ctx.body = {
+        ctx.json({
             code: config.SUCCODE,
-            data: ctx.write(data[0]),
+            data: data[0],
             msg: config.SUCCMSG
-        }
+        })
     } catch (error) {
         ctx.body = {
             code: config.ERRCODE,
@@ -432,12 +432,12 @@ router.get('/role/authUser/allocatedList', async (ctx) => {
     if (params.phonenumber) { where.phonenumber = { like: `%${params.phonenumber}%` } }
     const rows = await exec(sql.table('sys_user').where(where).limit(utils.toInt(params.pageNum) - 1, params.pageSize).select())
     const total = await exec(sql.count().table('sys_user').where(where).select())
-    ctx.body = {
+    ctx.json({
         code: config.SUCCODE,
-        rows: ctx.write(rows),
+        rows,
         total: total[0]['COUNT(1)'],
         msg: config.QUETYMSG
-    }
+    })
 })
 router.put('/role/dataScope', async (ctx) => {
     var roleId = ctx.request.body.roleId;
@@ -483,14 +483,14 @@ router.get('/menu/list', async (ctx, next) => {
     if (params.menuName) { where.menu_name = { like: `%${params.menuName}%` } }
     if (params.status != undefined && params.status != '') { where.status = params.status }
     const data = await exec(sql.table('sys_menu').where(where).order('order_num').select())
-    ctx.body = {
+    ctx.json({
         code: config.SUCCODE,
-        data: ctx.write(data),
+        data,
         msg: config.QUETYMSG
-    }
+    })
 })
 router.post('/menu', async (ctx) => {
-    var params = ctx.writeLine(ctx.request.body);
+    var params = ctx.write(ctx.request.body);
     params.create_time = new Date();
     params.create_by = utils.getUser(ctx, 'user_name');
     params.parent_id = params.parent_id.toString();
@@ -502,7 +502,7 @@ router.post('/menu', async (ctx) => {
     utils.operLog(ctx)
 })
 router.put('/menu', async (ctx) => {
-    var params = ctx.writeLine(ctx.request.body);
+    var params = ctx.write(ctx.request.body);
     params.update_time = new Date();
     params.update_by = utils.getUser(ctx, 'user_name');
     await exec(sql.table('sys_menu').data(params).where({ menu_id: params.menu_id }).update())
@@ -517,18 +517,18 @@ router.get('/menu/:menuId', async (ctx) => {
         if (ctx.params.menuId === 'treeselect') {
             const data = await exec(sql.table('sys_menu').field('menu_id,menu_name,parent_id').select())
             const menuTree = utils.toMenuTreeLable(data)
-            ctx.body = {
+            ctx.json({
                 code: config.SUCCODE,
-                data: ctx.write(menuTree),
+                data: menuTree,
                 msg: config.SUCCMSG
-            }
+            })
         } else {
             const data = await exec(sql.table('sys_menu').where({ menu_id: ctx.params.menuId }).select());
-            ctx.body = {
+            ctx.json({
                 code: config.SUCCODE,
-                data: ctx.write(data[0]),
+                data: data[0],
                 msg: config.SUCCMSG
-            }
+            })
         }
     } catch (error) {
         ctx.body = {
@@ -598,16 +598,16 @@ router.get('/dept/list', async (ctx, next) => {
     if (params.deptName) { where.dept_name = { like: `%${params.deptName}%` } }
     if (params.status != undefined && params.status != '') { where.status = params.status }
     const data = await exec(sql.table('sys_dept').where(where).order('order_num').select())
-    ctx.body = {
+    ctx.json({
         code: config.SUCCODE,
-        data: ctx.write(data),
+        data,
         msg: config.QUETYMSG
-    }
+    })
 })
 router.post('/dept', async (ctx) => {
     try {
         const rows = await exec(sql.table('sys_dept').field('ancestors').where({ dept_id: ctx.request.body.parentId }).select())
-        var params = ctx.writeLine(ctx.request.body);
+        var params = ctx.write(ctx.request.body);
         params.create_time = new Date();
         params.create_by = utils.getUser(ctx, 'user_name');
         params.ancestors = rows[0].ancestors + ',' + params.parent_id,
@@ -628,7 +628,7 @@ router.post('/dept', async (ctx) => {
 router.put('/dept', async (ctx) => {
     try {
         const rows = await exec(sql.table('sys_dept').field('ancestors').where({ dept_id: ctx.request.body.parentId }).select())
-        var params = ctx.writeLine(ctx.request.body);
+        var params = ctx.write(ctx.request.body);
         params.update_time = new Date();
         params.update_by = utils.getUser(ctx, 'user_name');
         params.ancestors = rows[0].ancestors + ',' + params.parent_id,
@@ -656,11 +656,11 @@ router.get('/dept/:deptId', async (ctx) => {
             const res = await exec(sql.table('sys_dept').where({ del_flag: 0, dept_id: ctx.params.deptId }).select());
             data = res[0]
         }
-        ctx.body = {
+        ctx.json({
             code: config.SUCCODE,
-            data: ctx.write(data),
+            data,
             msg: config.SUCCMSG
-        }
+        })
     } catch (error) {
         ctx.body = {
             code: config.ERRCODE,
@@ -683,11 +683,11 @@ router.get('/dept/list/exclude/:deptId', async (ctx) => {
     if (data[0].parent_id !== 0) {
         result = await exec(sql.table('sys_dept').where({ del_flag: 0, parent_id: { NEQ: ctx.params.deptId }, dept_id: { NEQ: ctx.params.deptId } }).order('order_num').select())
     }
-    ctx.body = {
+    ctx.json({
         code: config.SUCCODE,
-        data: ctx.write(result),
+        data: result,
         msg: config.QUETYMSG
-    }
+    })
 })
 router.get('/dept/roleDeptTreeselect/:roleId', async (ctx) => {
     try {
@@ -722,16 +722,16 @@ router.get('/post/list', async (ctx, next) => {
     if (params.status != undefined && params.status != '') { where.status = params.status }
     const rows = await exec(sql.table('sys_post').where(where).limit(utils.toInt(params.pageNum) - 1, params.pageSize).order('post_sort').select())
     const total = await exec(sql.count().table('sys_post').where(where).select())
-    ctx.body = {
+    ctx.json({
         code: config.SUCCODE,
-        rows: ctx.write(rows),
+        rows,
         total: total[0]['COUNT(1)'],
         msg: config.QUETYMSG
-    }
+    })
 })
 router.post('/post', async (ctx) => {
     try {
-        var params = ctx.writeLine(ctx.request.body);
+        var params = ctx.write(ctx.request.body);
         params.create_time = new Date();
         params.create_by = utils.getUser(ctx, 'user_name');
         await exec(sql.table('sys_post').data(params).insert())
@@ -750,7 +750,7 @@ router.post('/post', async (ctx) => {
 })
 router.put('/post', async (ctx) => {
     try {
-        var params = ctx.writeLine(ctx.request.body);
+        var params = ctx.write(ctx.request.body);
         params.update_time = new Date();
         params.update_by = utils.getUser(ctx, 'user_name');
         await exec(sql.table('sys_post').data(params).where({ post_id: params.post_id }).update())
@@ -769,11 +769,11 @@ router.put('/post', async (ctx) => {
 router.get('/post/:postId', async (ctx) => {
     try {
         const data = await exec(sql.table('sys_post').where({ post_id: ctx.params.postId }).select());
-        ctx.body = {
+        ctx.json({
             code: config.SUCCODE,
-            data: ctx.write(data[0]),
+            data: data[0],
             msg: config.SUCCMSG
-        }
+        })
     } catch (error) {
         ctx.body = {
             code: config.ERRCODE,
@@ -811,16 +811,16 @@ router.get('/notice/list', async (ctx, next) => {
     for (let i = 0; i < rows.length; i++) {
         rows[i].notice_content = decoder.write(rows[i].notice_content)
     }
-    ctx.body = {
+    ctx.json({
         code: config.SUCCODE,
-        rows: ctx.write(rows),
+        rows,
         total: total[0]['COUNT(1)'],
         msg: config.QUETYMSG
-    }
+    })
 })
 router.post('/notice', async (ctx) => {
     try {
-        var params = ctx.writeLine(ctx.request.body);
+        var params = ctx.write(ctx.request.body);
         params.create_time = new Date();
         params.create_by = utils.getUser(ctx, 'user_name');
         await exec(sql.table('sys_notice').data(params).insert())
@@ -838,7 +838,7 @@ router.post('/notice', async (ctx) => {
     }
 })
 router.put('/notice', async (ctx) => {
-    var params = ctx.writeLine(ctx.request.body);
+    var params = ctx.write(ctx.request.body);
     params.update_time = new Date();
     params.update_by = utils.getUser(ctx, 'user_name');
     await exec(sql.table('sys_notice').data(params).where({ notice_id: params.notice_id }).update())
@@ -852,11 +852,11 @@ router.get('/notice/:noticeId', async (ctx) => {
     try {
         const data = await exec(sql.table('sys_notice').where({ notice_id: ctx.params.noticeId }).select());
         data[0].notice_content = decoder.write(data[0].notice_content)
-        ctx.body = {
+        ctx.json({
             code: config.SUCCODE,
-            data: ctx.write(data[0]),
+            data: data[0],
             msg: config.SUCCMSG
-        }
+        })
     } catch (error) {
         ctx.body = {
             code: config.ERRCODE,
@@ -894,16 +894,16 @@ router.get('/config/list', async (ctx, next) => {
     }
     const rows = await exec(sql.table('sys_config').where(where).limit(utils.toInt(params.pageNum) - 1, params.pageSize).select())
     const total = await exec(sql.count().table('sys_config').where(where).select())
-    ctx.body = {
+    ctx.json({
         code: config.SUCCODE,
-        rows: ctx.write(rows),
+        rows,
         total: total[0]['COUNT(1)'],
         msg: config.QUETYMSG
-    }
+    })
 })
 router.post('/config', async (ctx) => {
     try {
-        var params = ctx.writeLine(ctx.request.body);
+        var params = ctx.write(ctx.request.body);
         params.create_time = new Date();
         params.create_by = utils.getUser(ctx, 'user_name');
         await exec(sql.table('sys_config').data(params).insert())
@@ -920,7 +920,7 @@ router.post('/config', async (ctx) => {
     }
 })
 router.put('/config', async (ctx) => {
-    var params = ctx.writeLine(ctx.request.body);
+    var params = ctx.write(ctx.request.body);
     params.update_time = new Date();
     params.update_by = utils.getUser(ctx, 'user_name');
     await exec(sql.table('sys_config').data(params).where({ config_id: params.config_id }).update())
@@ -932,11 +932,11 @@ router.put('/config', async (ctx) => {
 })
 router.get('/config/:configId', async (ctx) => {
     const data = await exec(sql.table('sys_config').where({ config_id: ctx.params.configId }).select(), 0);
-    ctx.body = {
+    ctx.json({
         code: config.SUCCODE,
-        data: ctx.write(data),
+        data,
         msg: config.SUCCMSG
-    }
+    })
 })
 router.delete('/config/:configId', async (ctx) => {
     await exec(sql.table('sys_config').where({ config_id: { in: ctx.params.Id } }).delet())

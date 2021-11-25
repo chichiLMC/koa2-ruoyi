@@ -1,6 +1,6 @@
 const toHump = async (ctx, next) => {
-    ctx.write = (obj) => ctx.body = toHumpFun(obj)
-    ctx.writeLine = (obj) => ctx.body = toLineFun(obj)
+    ctx.json = (obj) => ctx.body = toHumpFun(obj)
+    ctx.write = (obj) => toLineFun(obj)
     await next()
 }
 

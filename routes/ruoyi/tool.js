@@ -18,12 +18,12 @@ router.get('/gen/list', async (ctx, next) => {
     }
     const rows = await exec(sql.table('gen_table').where(where).limit(utils.toInt(params.pageNum)-1,params.pageSize).select())
     const total = await exec(sql.count().table('gen_table').where(where).select())
-    ctx.body = {
+    ctx.json({
         code: config.SUCCODE,
-        rows: ctx.write(rows),
+        rows,
         total: total[0]['COUNT(1)'],
         msg: config.QUETYMSG
-    }
+    })
 })
 
 
